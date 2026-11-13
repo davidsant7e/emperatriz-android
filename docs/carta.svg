@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 460" width="280" height="460"><defs><linearGradient id="d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f2a5c"/><stop offset="1" stop-color="#f4a582"/></linearGradient><linearGradient id="d2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4a582"/><stop offset="1" stop-color="#1f2a5c"/></linearGradient><clipPath id="c"><rect width="280" height="460" rx="20"/></clipPath></defs><g clip-path="url(#c)"><rect width="280" height="460" fill="url(#d)"/><rect y="346" width="280" height="114" fill="url(#d2)"/>
+<path d="M0 346 Q70 318 140 334 Q210 350 280 326 V346 Z" fill="#1f2a5c" opacity="0.35"/>
+<!-- trono con cojines -->
+<path d="M84 300 V150 Q84 112 140 112 Q196 112 196 150 V300 Z" fill="#1f2a5c"/>
+<circle cx="140" cy="128" r="7" fill="#f4a582"/>
+<!-- emperatriz: corona de estrellas, cabeza, manto -->
+<g fill="#f4a582">
+<path d="M124 146L126 141L128 146L133 147L128 149L126 154L124 149L119 147Z"/><path d="M140 140L142 135L144 140L149 141L144 143L142 148L140 143L135 141Z" transform="translate(-2 0)"/><path d="M156 146L158 141L160 146L165 147L160 149L158 154L156 149L151 147Z" transform="translate(-4 0)"/>
+<circle cx="140" cy="168" r="13"/>
+<path d="M114 262 Q112 190 140 186 Q168 190 166 262 Z"/>
+<rect x="98" y="258" width="84" height="14" rx="4"/>
+<rect x="104" y="272" width="12" height="28" opacity="0.8"/><rect x="164" y="272" width="12" height="28" opacity="0.8"/>
+</g>
+<!-- escudo con Venus -->
+<path d="M96 206 H124 V226 Q124 242 110 248 Q96 242 96 226 Z" fill="#1f2a5c" stroke="#f4a582" stroke-width="3"/>
+<g fill="none" stroke="#f4a582" stroke-width="3" stroke-linecap="round"><circle cx="110" cy="220" r="6"/><path d="M110 226 V236 M105 231 H115"/></g>
+<!-- cetro -->
+<path d="M172 200 V256" stroke="#1f2a5c" stroke-width="4" stroke-linecap="round"/><circle cx="172" cy="196" r="6" fill="#1f2a5c"/>
+<!-- trigo -->
+<g stroke="#1f2a5c" stroke-width="3" stroke-linecap="round" fill="none">
+<path d="M30 420 Q32 380 40 352 M250 420 Q248 380 240 352 M56 424 Q58 396 62 376 M224 424 Q222 396 218 376"/>
+</g>
+<g fill="#1f2a5c"><ellipse cx="40" cy="352" rx="5" ry="10"/><ellipse cx="240" cy="352" rx="5" ry="10"/><ellipse cx="62" cy="374" rx="4" ry="8"/><ellipse cx="218" cy="374" rx="4" ry="8"/></g>
+<!-- canasta de mercado -->
+<path d="M104 372 Q104 342 140 342 Q176 342 176 372" fill="none" stroke="#1f2a5c" stroke-width="4"/>
+<path d="M92 370 H188 L178 420 H102 Z" fill="#1f2a5c"/>
+<path d="M98 386 H182 M101 402 H179 M122 370 L124 420 M140 370 V420 M158 370 L156 420" stroke="#f4a582" stroke-width="2.5" opacity="0.7"/>
+<path d="M50 75L51.5 78.5L55 80L51.5 81.5L50 85L48.5 81.5L45 80L48.5 78.5Z" fill="#f4a582"/><path d="M232 61L233.5 64.5L237 66L233.5 67.5L232 71L230.5 67.5L227 66L230.5 64.5Z" fill="#f4a582"/>
+<text x="140" y="40" text-anchor="middle" fill="#f4a582" font-family="'Helvetica Neue', Arial, sans-serif" font-size="16" letter-spacing="7" font-weight="bold">III</text><text x="140" y="446" text-anchor="middle" fill="#f4a582" font-family="'Helvetica Neue', Arial, sans-serif" font-size="18" letter-spacing="8" font-weight="bold">LA EMPERATRIZ</text></g></svg>

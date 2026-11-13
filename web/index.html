@@ -1,0 +1,402 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Emperatriz</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: una columna de trabajo (agregar → filtros → lista por sección) y un panel de detalle que se abre al lado (abajo en el celular). */
+:root {
+  --noche: #1f2a5c; --durazno: #f4a582;
+  --bg: #f7f5f8; --surface: #ffffff; --fg: #1b2040; --muted: #5d6385; --line: #dfe0ea;
+  --accent: #1f2a5c; --accent-fg: #ffffff; --chip: #eceefa; --warm: #b4532a; --ok: #2f7a4f; --bad: #b3261e;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12183a; --surface: #1b2350; --fg: #eef0fb; --muted: #a9aed0; --line: #2e3870;
+  --accent: #f4a582; --accent-fg: #1f2a5c; --chip: #263070; --warm: #f4a582; --ok: #7fd1a0; --bad: #ff8a80; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12183a; --surface: #1b2350; --fg: #eef0fb; --muted: #a9aed0; --line: #2e3870;
+  --accent: #f4a582; --accent-fg: #1f2a5c; --chip: #263070; --warm: #f4a582; --ok: #7fd1a0; --bad: #ff8a80; color-scheme: dark }
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--body); margin: 0 }
+header { background: var(--noche); color: var(--durazno); padding-block: 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header .in { max-width: 1180px; margin: 0 auto; display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap }
+header h1 { font: 700 22px/1.2 var(--display); margin: 0; letter-spacing: .02em }
+header h1 small { font-weight: 500; letter-spacing: .3em; margin-right: 10px; opacity: .8 }
+header .sub { color: #dfe2f5; font-size: 13px; flex: 1; min-width: 200px }
+main { max-width: 1180px; margin: 0 auto; padding-block: 18px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start }
+@media (max-width: 880px) { main { grid-template-columns: minmax(0, 1fr) } }
+h2 { font: 700 15px/1.3 var(--display); margin: 0; letter-spacing: .03em }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px }
+.col { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
+textarea, input, select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; min-width: 0 }
+textarea { resize: vertical; min-height: 64px }
+button { font: 500 14px var(--body); border-radius: 8px; padding: 7px 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer }
+button.pri { background: var(--accent); color: var(--accent-fg); border-color: var(--accent) }
+button.link { border: 0; background: none; color: var(--warm); padding: 4px 6px }
+button:disabled { opacity: .5; cursor: default }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--durazno); outline-offset: 1px }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center }
+.hint { color: var(--muted); font-size: 12.5px }
+.chips { display: flex; gap: 6px; flex-wrap: wrap }
+.chip { background: var(--chip); border: 1px solid transparent; border-radius: 999px; padding: 4px 11px; font-size: 13px }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg) }
+.sec { font: 700 12px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--warm); margin: 10px 0 2px }
+.item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 7px 4px; border-bottom: 1px solid var(--line) }
+.item:last-child { border-bottom: 0 }
+.item .name { font-weight: 600; cursor: pointer; overflow-wrap: anywhere }
+.item .det { color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere }
+.item.sel { background: var(--chip); border-radius: 8px }
+.qty { display: flex; align-items: center; gap: 2px; font-variant-numeric: tabular-nums; font-weight: 600 }
+.qty button { padding: 2px 9px }
+input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--noche) }
+.done .name { color: var(--muted); font-weight: 500 }
+.proj { background: var(--noche); color: #fff; border-radius: 12px; padding: 12px 14px }
+.proj b { color: var(--durazno); font-family: var(--display) }
+aside { position: sticky; top: 12px }
+.price { padding: 6px 0; border-bottom: 1px dashed var(--line); font-size: 13.5px }
+.price b { font-variant-numeric: tabular-nums }
+a { color: var(--warm) }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--noche); color: var(--durazno); padding: 9px 16px; border-radius: 10px; font-size: 14px; max-width: calc(100% - 32px) }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
+label { font-size: 12.5px; color: var(--muted); display: flex; flex-direction: column; gap: 3px }
+pre.out { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 200px; overflow: auto; font-size: 12px; background: var(--bg); border-radius: 8px; padding: 8px; margin: 0 }
+@media (prefers-reduced-motion: no-preference) { .toast { transition: opacity .2s } }
+</style>
+
+<header><div class="in">
+  <h1><small>III</small>La Emperatriz</h1>
+  <span class="sub">Lista de compras del PC. Se cruza con el celular y con Claude por JSON.</span>
+</div></header>
+
+<main>
+  <div class="col">
+    <section class="box col" aria-labelledby="t-agregar">
+      <h2 id="t-agregar">¿Qué hay que comprar?</h2>
+      <textarea id="entrada" placeholder="2 kg de arroz, leche y 3 tornillos #Baño&#10;…o pega aquí el JSON de Claude o el respaldo del celular"></textarea>
+      <div class="row">
+        <button class="pri" id="b-agregar">Agregar</button>
+        <label style="flex-direction:row;align-items:center;gap:6px">Proyecto de lo nuevo
+          <select id="proy-nuevo" style="width:auto"></select></label>
+        <button id="b-archivo">Abrir archivo…</button>
+        <input type="file" id="archivo" accept=".json,.txt,application/json,text/plain" hidden>
+      </div>
+      <div id="respaldo" class="row" hidden>
+        <span id="respaldo-t"></span>
+        <button class="pri" id="b-combinar">Combinar</button>
+        <button id="b-reemplazar">Reemplazar todo</button>
+        <button class="link" id="b-cancelar">Cancelar</button>
+      </div>
+    </section>
+
+    <section class="col" aria-label="Filtros">
+      <div class="chips" id="f-sec"></div>
+      <div class="chips" id="f-proy"></div>
+    </section>
+    <div id="resumen-proy"></div>
+    <section class="box" id="lista" aria-label="Lista"></section>
+  </div>
+
+  <aside class="col">
+    <section class="box col" id="detalle" hidden></section>
+    <section class="box col" aria-labelledby="t-env">
+      <h2 id="t-env">Enviar y guardar</h2>
+      <div class="row">
+        <button class="pri" id="b-claude">Copiar para Claude</button>
+        <button id="b-texto">Copiar lista</button>
+        <button id="b-json">Copiar respaldo JSON</button>
+        <button id="b-descargar">Descargar respaldo</button>
+      </div>
+      <pre class="out" id="salida" hidden></pre>
+      <p class="hint" style="margin:0">Pasa el respaldo al celular por WhatsApp, correo o Drive y ábrelo con La Emperatriz (Compartir → La Emperatriz). Lo del celular llega aquí con «Abrir archivo» o pegándolo arriba. La sincronización automática llega en la fase 2 (AWS).</p>
+    </section>
+    <section class="box col" aria-labelledby="t-aj">
+      <h2 id="t-aj">Gemini (precios)</h2>
+      <label>Clave de Gemini (se guarda solo en este navegador)<input id="clave" type="password" autocomplete="off" placeholder="AIza…"></label>
+      <div class="grid2">
+        <label>Ciudad<input id="ciudad" placeholder="Bogotá"></label>
+        <label>Moneda<input id="moneda" value="COP"></label>
+      </div>
+      <label>Modelo<input id="modelo" value="gemini-3.5-flash"></label>
+      <p class="hint" style="margin:0">La búsqueda de precios funciona abriendo este archivo desde el PC (web/index.html del repositorio). Desde el enlace de Claude la página no puede conectarse a Gemini.</p>
+    </section>
+  </aside>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const SECS = {mercado:'Mercado', aseo:'Aseo', farmacia:'Farmacia', ferreteria:'Ferretería', hogar:'Hogar', tecnologia:'Tecnología', otro:'Otro'};
+const KEYS = Object.keys(SECS);
+const PISTAS = [
+  ['tecnologia', ['cable usb','cargador','pila','bateria','audifono','memoria usb','mouse','teclado']],
+  ['ferreteria', ['tornillo','puntilla','clavo','chazo','pintura','brocha','rodillo','cemento','pegante','tubo','pvc','cable','bombillo','cinta','silicona','lija','taladro','broca','llave','masilla','estuco','codo','teflon','tuerca','arandela','bisagra','cerradura','candado','manguera','thinner','varsol','drywall','tomacorriente','interruptor','grifo','sifon','martillo','destornillador','alicate','impermeabilizante']],
+  ['aseo', ['jabon','detergente','cloro','limpiador','papel higienico','esponja','suavizante','desinfectante','lavaloza','trapero','escoba','bolsas de basura','servilleta','shampoo','crema dental','desodorante']],
+  ['farmacia', ['acetaminofen','ibuprofeno','curita','alcohol antiseptico','gasa','vitamina','suero','loratadina','tapabocas','bloqueador']],
+  ['hogar', ['cortina','sabana','almohada','vaso','plato','olla','sarten','organizador','tapete','cojin']],
+];
+const UNI = {};
+[['kg','kilo kilos kilogramo kilogramos'],['g','gr gramo gramos'],['lb','libra libras'],['l','lt litro litros'],['ml','mililitro mililitros cc'],
+ ['und','unidad unidades u'],['paquete','paquetes paq'],['caja','cajas'],['bolsa','bolsas'],['docena','docenas'],['m','metro metros mts'],['cm',''],['mm',''],
+ ['galón','galon galones gal'],['rollo','rollos'],['tarro','tarros'],['botella','botellas'],['lata','latas'],['bulto','bultos'],['frasco','frascos'],
+ ['sobre','sobres'],['tubo','tubos'],['par','pares'],['juego','juegos'],['cuarto','cuartos'],['lámina','lamina laminas láminas']]
+ .forEach(([f, v]) => (f + ' ' + v).split(' ').filter(Boolean).forEach(x => UNI[simple(x)] = f));
+const NUM = {un:1,uno:1,una:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10,once:11,doce:12,quince:15,veinte:20,medio:.5,media:.5,par:2};
+
+function simple(s) { return (s || '').normalize('NFD').replace(/\p{M}+/gu, '').toLowerCase().replace(/\s+/g, ' ').trim() }
+function hoy() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') }
+function id() { return Math.random().toString(16).slice(2, 12) }
+function cant(t) {
+  const s = simple(t).replace(/^x/, '').trim(); if (!s) return null;
+  if (s in NUM) return NUM[s];
+  let m = s.match(/^(\d+) (\d+)\/(\d+)$/); if (m) return +m[1] + m[2] / Math.max(1, m[3]);
+  m = s.match(/^(\d+)\/(\d+)$/); if (m) return m[1] / Math.max(1, m[2]);
+  return /^\d+([.,]\d+)?$/.test(s) ? parseFloat(s.replace(',', '.')) : null;
+}
+function precioDe(t) {
+  let s = String(t ?? '').replace(/[^0-9.,]/g, ''); if (!/\d/.test(s)) return null;
+  const p = s.lastIndexOf('.'), c = s.lastIndexOf(',');
+  if (p >= 0 && c >= 0) { const dec = p > c ? '.' : ','; s = s.split(dec === '.' ? ',' : '.').join('').replace(dec, '.') }
+  else if (p >= 0 || c >= 0) { const sep = p >= 0 ? '.' : ','; const parts = s.split(sep); s = (parts.length > 2 || parts.at(-1).length === 3) ? parts.join('') : parts.join('.') }
+  const n = parseFloat(s); return isNaN(n) ? null : n;
+}
+function num(n) { return Number.isInteger(n) ? String(n) : String(+n.toFixed(2)).replace('.', ',') }
+function dinero(n, m = 'COP') { return ['COP', 'CLP'].includes(m) ? '$' + Math.round(n).toLocaleString('es-CO') : n.toLocaleString('es-CO', {minimumFractionDigits: 2}) + ' ' + m }
+function uniTexto(c, u) { if (!u) return num(c); const abv = ['kg','g','lb','l','ml','und','m','cm','mm']; return num(c) + ' ' + (c > 1 && !abv.includes(u) ? ({'galón':'galones', par:'pares', 'lámina':'láminas'}[u] || u + 's') : u) }
+function adivinar(n) { const t = ' ' + simple(n) + ' '; return (PISTAS.find(([, ps]) => ps.some(p => t.includes(' ' + p))) || ['mercado'])[0] }
+function normSec(t) { const s = simple(t); if (KEYS.includes(s)) return s; const k = KEYS.find(k => simple(SECS[k]) === s); if (k) return k;
+  if (s.startsWith('ferre')) return 'ferreteria'; if (s.includes('aseo') || s.includes('limpi')) return 'aseo'; if (s.includes('farma') || s.includes('drog')) return 'farmacia';
+  if (s.includes('tecno')) return 'tecnologia'; if (s.includes('hogar')) return 'hogar'; return s ? 'otro' : 'mercado' }
+function normUni(u) { const s = simple(u); return s ? (UNI[s] || s) : '' }
+const clave = p => [simple(p.nombre), p.unidad, p.seccion, simple(p.proyecto)].join('|');
+
+/* Una línea: «2 kg de arroz», «arroz 2 kg», «leche x3», «media docena de huevos», «tornillos #Baño». */
+function linea(orig) {
+  let s = orig.replace(/^\s*(?:[-*•·]|\d+[.)]\s|\[\s?[xX ]?\s?\]|☐|✓|✔)\s*/, '').trim().replace(/[.,]+$/, '');
+  if (!s) return null;
+  let proyecto = '';
+  const mp = s.match(/\s*(?:\(\s*proyecto\s*:?\s*([^)]+)\)|\bpara (?:el |la )?proyecto\s+(.+)$|#(\S+)$)/i);
+  if (mp) { proyecto = (mp[1] || mp[2] || mp[3] || '').trim(); s = (s.slice(0, mp.index) + s.slice(mp.index + mp[0].length)).trim() }
+  let c = null, u = '';
+  const mx = s.match(/\s*(?:x|por)\s*(\d+(?:[.,]\d+)?)\s*$/i);
+  if (mx) { c = cant(mx[1]); s = s.slice(0, mx.index).trim() }
+  const w = s.split(/\s+/);
+  if (c == null) {
+    const dos = w.slice(0, 2).join(' ');
+    const n2 = w.length > 2 && (dos.includes('/') || simple(dos) === 'un par') ? cant(dos) : null;
+    if (n2 != null) { c = n2; w.splice(0, 2) } else if (w.length > 1 && cant(w[0]) != null) { c = cant(w[0]); w.shift() }
+    if (c != null && w.length > 2 && simple(w[0]) === 'de' && UNI[simple(w[1])]) w.shift();
+    if (c != null && w.length > 1 && UNI[simple(w[0])]) u = normUni(w.shift());
+    if (c != null && w.length > 1 && simple(w[0]) === 'de') w.shift();
+  }
+  if (c == null && w.length > 2 && UNI[simple(w.at(-1))] && cant(w.at(-2)) != null) { c = cant(w.at(-2)); u = normUni(w.at(-1)); w.splice(-2) }
+  if (u === 'docena' && c != null && w.length) { c *= 12; u = 'und' }
+  const nombre = w.join(' ').replace(/^[-:\s]+|[-:\s]+$/g, '');
+  if (!/\p{L}/u.test(nombre)) return null;
+  return nuevo({nombre, cantidad: c > 0 ? c : 1, unidad: u, seccion: adivinar(nombre), proyecto});
+}
+function nuevo(o) { return Object.assign({id: id(), nombre: '', cantidad: 1, unidad: '', seccion: 'mercado', proyecto: '', notas: '', estado: 'pendiente', creado: hoy(), historial: [], precios: []}, o, {nombre: (o.nombre || '').charAt(0).toUpperCase() + (o.nombre || '').slice(1)}) }
+function deMapa(m) {
+  if (typeof m === 'string') return linea(m);
+  const n = (m && (m.nombre || m.producto || m.name) || '').trim(); if (!n) return null;
+  const sinSec = m.seccion == null && m.categoria == null;
+  return nuevo({id: m.id || id(), nombre: n, cantidad: (typeof m.cantidad === 'number' ? m.cantidad : cant(m.cantidad)) || 1, unidad: normUni(m.unidad),
+    seccion: sinSec ? adivinar(n) : normSec(m.seccion || m.categoria), proyecto: (m.proyecto || '').trim(), notas: (m.notas || m.descripcion || '').trim(),
+    enlace: /^http/.test(m.enlace || '') ? m.enlace : undefined, estado: simple(m.estado) === 'comprado' ? 'comprado' : 'pendiente', creado: m.creado || hoy(),
+    historial: Array.isArray(m.historial) ? m.historial : [], precios: Array.isArray(m.precios) ? m.precios : [], _sinSec: sinSec});
+}
+function extraerJson(t) {
+  const c = (t.includes('```') ? t.split('```')[1].replace(/^json/, '') : t).trim();
+  const i = c.search(/[{[]/); if (i < 0) return null;
+  const f = c.lastIndexOf(c[i] === '{' ? '}' : ']'); return f > i ? c.slice(i, f + 1) : null;
+}
+/* Lo que llega: JSON (Claude o respaldo) o texto. */
+function leer(t) {
+  const j = extraerJson(t);
+  if (j) try {
+    const r = JSON.parse(j); const lista = Array.isArray(r) ? r : (r.productos || r.items || r.lista || []);
+    const ps = lista.map(deMapa).filter(Boolean).map(p => { if (!p.proyecto && r.proyecto) p.proyecto = r.proyecto; if (p._sinSec && r.seccion) p.seccion = normSec(r.seccion); delete p._sinSec; return p });
+    const proys = (r.proyectos || []).map(x => typeof x === 'string' ? {nombre: x} : x).filter(x => x && x.nombre);
+    if (ps.length || proys.length) return {productos: ps, proyectos: proys, respaldo: r.app === 'la-emperatriz'};
+  } catch (e) { /* no era JSON: se lee como texto */ }
+  return {productos: t.split(/\n|;|,(?!\d)|\s+y\s+/i).map(linea).filter(Boolean), proyectos: [], respaldo: false};
+}
+
+/* ---------- estado ---------- */
+const EJEMPLO = {app: 'la-emperatriz', version: 1, proyectos: [{nombre: 'Baño', notas: 'Ejemplo: cambiar silicona y grifo', origen: 'Proyecto de la casa (Claude)', archivado: false}], productos:
+  ['2 kg de arroz', 'leche x3', 'media docena de huevos', '1 galón de pintura blanca #Baño', '2 tubos de silicona antihongos #Baño', 'jabón rey'].map(linea)};
+EJEMPLO.productos[0].historial = [{fecha: '2026-10-30', cantidad: 2, precio: 9800, tienda: 'D1'}, {fecha: '2026-11-06', cantidad: 2, precio: 9900, tienda: 'D1'}];
+let D = cargar(), filtroSec = null, filtroProy = null, abierto = null, verComprados = false, porImportar = null;
+function cargar() { try { const t = localStorage.getItem('emperatriz'); if (t) { const r = leer(t); return {productos: r.productos, proyectos: r.proyectos} } } catch (e) {} return {productos: EJEMPLO.productos, proyectos: EJEMPLO.proyectos, ejemplo: true} }
+function guardar() { D.ejemplo = false; try { localStorage.setItem('emperatriz', respaldo()) } catch (e) {} pintar() }
+function respaldo() { return JSON.stringify({app: 'la-emperatriz', version: 1, actualizado: hoy(), proyectos: D.proyectos, productos: D.productos}) }
+function proyectos() { const v = new Map(); D.proyectos.filter(p => !p.archivado).forEach(p => v.set(simple(p.nombre), p.nombre)); D.productos.forEach(p => p.proyecto && !v.has(simple(p.proyecto)) && v.set(simple(p.proyecto), p.proyecto)); return [...v.values()] }
+function agregar(ps) {
+  let a = 0, u = 0;
+  ps.forEach(n => {
+    const porId = D.productos.findIndex(p => p.id === n.id);
+    if (porId >= 0) { D.productos[porId] = n; u++; return }
+    const e = D.productos.find(p => clave(p) === clave(n));
+    if (!e) { D.productos.push(Object.assign(n, {estado: 'pendiente'})); a++; return }
+    u++; if (e.estado === 'comprado') { e.estado = 'pendiente'; e.cantidad = n.cantidad } else e.cantidad += n.cantidad;
+    e.notas = e.notas || n.notas; e.enlace = e.enlace || n.enlace;
+  });
+  ps.forEach(n => n.proyecto && !D.proyectos.some(p => simple(p.nombre) === simple(n.proyecto)) && D.proyectos.push({nombre: n.proyecto, notas: '', origen: '', archivado: false}));
+  return [a, u];
+}
+function avisar(t) { const e = document.getElementById('toast'); e.textContent = t; e.hidden = false; clearTimeout(avisar.t); avisar.t = setTimeout(() => e.hidden = true, 2800) }
+function resumen(a, u) { return [a && (a + (a === 1 ? ' agregado' : ' agregados')), u && (u + (u === 1 ? ' actualizado' : ' actualizados'))].filter(Boolean).join(' · ') || 'Sin cambios' }
+function paso(u) { return ['kg', 'lb', 'l'].includes(u) ? .5 : ['g', 'ml'].includes(u) ? 100 : 1 }
+function buscar(idp) { return D.productos.find(p => p.id === idp) }
+function mejor(p) { return (p.precios || []).filter(x => x.precio > 0).sort((a, b) => a.precio - b.precio)[0] }
+
+/* ---------- acciones ---------- */
+const $ = s => document.getElementById(s);
+$('b-agregar').onclick = () => entrar($('entrada').value);
+$('entrada').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) entrar($('entrada').value) });
+$('b-archivo').onclick = () => $('archivo').click();
+$('archivo').onchange = async e => { const f = e.target.files[0]; if (f) entrar((await f.text()).replace(/^﻿/, '')); e.target.value = '' };
+$('proy-nuevo').onchange = e => { try { localStorage.setItem('emperatriz-proy', e.target.value) } catch (x) {} };
+function entrar(t) {
+  if (!t.trim()) return;
+  const r = leer(t);
+  if (!r.productos.length && !r.proyectos.length) return avisar('No encontré productos en el texto');
+  if (D.ejemplo) D = {productos: [], proyectos: []};
+  const pn = $('proy-nuevo').value;
+  r.productos.forEach(p => { if (!p.proyecto && pn) p.proyecto = pn; if (filtroSec && !extraerJson(t)) p.seccion = filtroSec });
+  if (r.respaldo) { porImportar = r; $('respaldo-t').textContent = `Respaldo con ${r.productos.length} productos:`; $('respaldo').hidden = false; return }
+  r.proyectos.forEach(p => !D.proyectos.some(x => simple(x.nombre) === simple(p.nombre)) && D.proyectos.push(p));
+  const [a, u] = agregar(r.productos); $('entrada').value = ''; guardar(); avisar(resumen(a, u));
+}
+$('b-combinar').onclick = () => { const r = porImportar; r.proyectos.forEach(p => !D.proyectos.some(x => simple(x.nombre) === simple(p.nombre)) && D.proyectos.push(p)); const [a, u] = agregar(r.productos); fin(); avisar(resumen(a, u)) };
+$('b-reemplazar').onclick = () => { D = {productos: porImportar.productos, proyectos: porImportar.proyectos}; fin(); avisar('Lista reemplazada') };
+$('b-cancelar').onclick = () => { porImportar = null; $('respaldo').hidden = true };
+function fin() { porImportar = null; $('respaldo').hidden = true; $('entrada').value = ''; guardar() }
+
+function comprar(p, precio, tienda) { p.estado = 'comprado'; p.historial = (p.historial || []).concat([Object.assign({fecha: hoy(), cantidad: p.cantidad}, precio ? {precio} : {}, tienda ? {tienda} : {})]); guardar() }
+function volver(p) { if (p.estado === 'comprado') { p.estado = 'pendiente'; p.cantidad = (p.historial.at(-1) || {}).cantidad || p.cantidad } else p.cantidad += paso(p.unidad); guardar(); avisar(uniTexto(p.cantidad, p.unidad) + ' ' + p.nombre + ': de nuevo en la lista') }
+
+function textoLista() {
+  const g = grupos(); if (!g.length) return 'Lista vacía';
+  return '🛒 Lista de compras' + (filtroProy ? ' · ' + filtroProy : '') + '\n' + g.map(([s, ps]) => '\n' + SECS[s].toUpperCase() + '\n' + ps.map(p => '☐ ' + lin(p)).join('\n')).join('\n');
+}
+function lin(p) { const c = p.cantidad === 1 && !p.unidad ? '' : uniTexto(p.cantidad, p.unidad) + ' '; const x = [p.proyecto, p.notas].filter(Boolean).join(' · '); return c + p.nombre + (x ? ` (${x})` : '') }
+function paraClaude() {
+  const pend = D.productos.filter(p => p.estado !== 'comprado').length;
+  const compacto = {app: 'la-emperatriz', version: 1, actualizado: hoy(), proyectos: D.proyectos.filter(p => !p.archivado), productos: D.productos.map(p => ({id: p.id, nombre: p.nombre, cantidad: p.cantidad, unidad: p.unidad, seccion: p.seccion, proyecto: p.proyecto || undefined, notas: p.notas || undefined, enlace: p.enlace, estado: p.estado, veces_comprado: (p.historial || []).length, ultima_compra: (p.historial || []).at(-1), mejor_precio: mejor(p)}))};
+  return `Mi lista de La Emperatriz (${hoy()}): ${pend} pendientes, ${D.productos.length - pend} comprados.\n\n${textoLista()}\n\nSi me devuelves cambios, responde con un JSON {"productos":[{"nombre","cantidad","unidad","seccion","proyecto","notas","enlace"}]} (conserva el "id" de los que modifiques; secciones: ${KEYS.join(', ')}).\n\n\`\`\`json\n${JSON.stringify(compacto)}\n\`\`\``;
+}
+async function copiar(t, msg) {
+  try { await navigator.clipboard.writeText(t); avisar(msg) }
+  catch (e) { const o = $('salida'); o.textContent = t; o.hidden = false; const r = document.createRange(); r.selectNodeContents(o); getSelection().removeAllRanges(); getSelection().addRange(r); avisar('Texto seleccionado: cópialo con Ctrl+C') }
+}
+$('b-claude').onclick = () => copiar(paraClaude(), 'Copiado: pégalo en Claude');
+$('b-texto').onclick = () => copiar(textoLista(), 'Lista copiada');
+$('b-json').onclick = () => copiar(respaldo(), 'Respaldo copiado');
+/* Dentro del visor de Claude (iframe) las descargas no están permitidas: ahí se usa «Copiar respaldo JSON». */
+if (window.self !== window.top) $('b-descargar').hidden = true;
+$('b-descargar').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([respaldo()], {type: 'application/json'})); a.download = `emperatriz-respaldo-${hoy()}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000) };
+
+/* ---------- Gemini ---------- */
+['clave', 'ciudad', 'moneda', 'modelo'].forEach(k => { const e = $(k); try { const v = localStorage.getItem('emperatriz-' + k); if (v) e.value = v } catch (x) {} e.onchange = () => { try { localStorage.setItem('emperatriz-' + k, e.value.trim()) } catch (x) {} } });
+async function precios(p, btn) {
+  const key = $('clave').value.trim(); if (!key) return avisar('Pon tu clave de Gemini (columna derecha)');
+  btn.disabled = true; btn.textContent = 'Buscando…';
+  const lugar = [$('ciudad').value.trim(), 'Colombia'].filter(Boolean).join(', '), mon = $('moneda').value.trim() || 'COP';
+  const instr = 'Eres La Emperatriz, asistente de compras. Busca en Google el precio ACTUAL del producto en tiendas del país y la ciudad indicados. Hasta 8 precios con "tienda", "precio" (número en la moneda indicada), "moneda", "presentacion", "fecha" (AAAA-MM-DD que muestre la página, vacío si no se ve), "enlace" y "nota". Solo precios que veas; nunca inventes. Si hay página del producto, identifica el producto exacto en "producto" y "descripcion". "resumen": dónde está más barato. Responde SOLO con un objeto JSON {"producto","descripcion","resumen","precios":[...]}.';
+  const pedido = `Hoy es ${hoy()}. Compro en ${lugar} (moneda ${mon}).\nProducto: ${lin(Object.assign({}, p, {proyecto: ''}))}\n` + (p.enlace ? `Página del producto: ${p.enlace}\n` : '');
+  const tools = [{google_search: {}}].concat(p.enlace ? [{url_context: {}}] : []);
+  try {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent($('modelo').value.trim() || 'gemini-3.5-flash')}:generateContent`, {method: 'POST', headers: {'Content-Type': 'application/json', 'x-goog-api-key': key},
+      body: JSON.stringify({systemInstruction: {parts: [{text: instr}]}, contents: [{role: 'user', parts: [{text: pedido}]}], tools, generationConfig: {temperature: .2}})});
+    const j = await r.json(); if (!r.ok) throw new Error((j.error && j.error.message) || ('Gemini respondió ' + r.status));
+    const c = j.candidates && j.candidates[0]; const txt = ((c && c.content && c.content.parts) || []).filter(x => !x.thought).map(x => x.text || '').join('');
+    const d = JSON.parse(extraerJson(txt) || '{}');
+    const nuevos = (d.precios || []).filter(x => x.tienda).map(x => ({tienda: x.tienda, precio: typeof x.precio === 'number' && x.precio > 0 ? x.precio : precioDe(x.precio), moneda: (x.moneda || mon).toUpperCase(), fecha: x.fecha || undefined, consultado: hoy(), enlace: /^http/.test(x.enlace || '') ? x.enlace : undefined, presentacion: x.presentacion || undefined, nota: x.nota || undefined}));
+    const tiendas = new Set(nuevos.map(x => simple(x.tienda)));
+    p.precios = nuevos.concat((p.precios || []).filter(x => !tiendas.has(simple(x.tienda)))).slice(0, 12);
+    p._resumen = d.resumen; guardar(); avisar(nuevos.length ? nuevos.length + ' precios encontrados' : 'Gemini no encontró precios publicados');
+  } catch (e) {
+    avisar(e instanceof TypeError ? 'Sin conexión con Gemini: abre este archivo desde el PC (no desde el enlace de Claude)' : e.message);
+  } finally { btn.disabled = false; btn.textContent = 'Buscar precios' }
+}
+
+/* ---------- pintar ---------- */
+function grupos(comprados = false) {
+  const ps = D.productos.filter(p => (p.estado === 'comprado') === comprados && (!filtroSec || p.seccion === filtroSec) && (filtroProy == null || simple(p.proyecto) === simple(filtroProy)));
+  return KEYS.map(s => [s, ps.filter(p => p.seccion === s).sort((a, b) => simple(a.nombre).localeCompare(simple(b.nombre)))]).filter(([, l]) => l.length);
+}
+function el(tag, attrs = {}, ...hijos) { const e = document.createElement(tag); Object.entries(attrs).forEach(([k, v]) => k.startsWith('on') ? e[k] = v : k === 'class' ? e.className = v : e.setAttribute(k, v)); hijos.flat().forEach(h => h != null && e.append(h)); return e }
+function detalleDe(p, conProy) {
+  const m = mejor(p), u = (p.historial || []).filter(h => h.precio).at(-1);
+  return [p.cantidad !== 1 || p.unidad ? uniTexto(p.cantidad, p.unidad) : null, conProy ? p.proyecto : null,
+    m ? `desde ${dinero(m.precio, m.moneda)} en ${m.tienda}` : u ? `última vez ${dinero(u.precio)}` : null, p.notas].filter(Boolean).join(' · ');
+}
+function pintar() {
+  const pend = D.productos.filter(p => p.estado !== 'comprado');
+  const fs = $('f-sec'); fs.replaceChildren(chip('Todo · ' + pend.length, filtroSec == null, () => { filtroSec = null; pintar() }),
+    ...KEYS.filter(s => pend.some(p => p.seccion === s) || filtroSec === s).map(s => chip(SECS[s] + ' · ' + pend.filter(p => p.seccion === s).length, filtroSec === s, () => { filtroSec = filtroSec === s ? null : s; pintar() })));
+  const ps = proyectos();
+  $('f-proy').replaceChildren(...(ps.length ? [chip('Todos', filtroProy == null, () => { filtroProy = null; pintar() }), chip('General', filtroProy === '', () => { filtroProy = filtroProy === '' ? null : ''; pintar() }),
+    ...ps.map(n => chip(n, filtroProy === n, () => { filtroProy = filtroProy === n ? null : n; pintar() }))] : []));
+  let pn = ''; try { pn = localStorage.getItem('emperatriz-proy') || '' } catch (e) {}
+  $('proy-nuevo').replaceChildren(el('option', {value: ''}, 'ninguno'), ...ps.map(n => { const o = el('option', {value: n}, n); if (n === pn) o.selected = true; return o }));
+  const rp = $('resumen-proy'); rp.replaceChildren();
+  if (filtroProy) {
+    const pp = D.productos.filter(p => simple(p.proyecto) === simple(filtroProy)), info = D.proyectos.find(p => p.nombre === filtroProy) || {};
+    const pagado = pp.reduce((s, p) => s + (p.historial || []).reduce((t, h) => t + (h.precio || 0), 0), 0);
+    const falta = pp.filter(p => p.estado !== 'comprado').reduce((s, p) => s + ((mejor(p) || {}).precio || 0) * p.cantidad, 0);
+    rp.append(el('div', {class: 'proj'}, el('b', {}, filtroProy), info.origen ? el('div', {class: 'hint', style: 'color:#dfe2f5'}, 'De: ' + info.origen) : null,
+      info.notas ? el('div', {}, info.notas) : null, el('div', {}, `Pagado ${dinero(pagado)} · falta aprox. ${dinero(falta)}`)));
+  }
+  const L = $('lista'); L.replaceChildren();
+  if (D.ejemplo) L.append(el('p', {class: 'hint', style: 'margin:0 0 6px'}, 'Lista de ejemplo: agrega lo tuyo o abre tu respaldo y se reemplaza.'));
+  const g = grupos();
+  if (!g.length) L.append(el('p', {class: 'hint'}, 'Nada pendiente aquí.'));
+  g.forEach(([s, l]) => { L.append(el('div', {class: 'sec'}, SECS[s] + ' · ' + l.length)); l.forEach(p => L.append(fila(p))) });
+  const c = grupos(true).flatMap(([, l]) => l);
+  if (c.length) {
+    L.append(el('div', {class: 'row', style: 'margin-top:10px'}, el('button', {class: 'link', onclick: () => { verComprados = !verComprados; pintar() }}, (verComprados ? '▾ ' : '▸ ') + `Comprados (${c.length})`),
+      verComprados ? el('button', {class: 'link', onclick: () => { D.productos = D.productos.filter(p => p.estado !== 'comprado'); guardar() }}, 'Borrar comprados') : null));
+    if (verComprados) c.forEach(p => L.append(el('div', {class: 'item done' + (abierto === p.id ? ' sel' : '')}, el('span', {}, '✓'),
+      el('div', {}, el('div', {class: 'name', onclick: () => abrir(p.id)}, p.nombre), el('div', {class: 'det'}, [(p.historial.at(-1) || {}).fecha && 'comprado ' + p.historial.at(-1).fecha, p.historial.length > 1 && p.historial.length + ' veces'].filter(Boolean).join(' · '))),
+      el('button', {class: 'link', onclick: () => volver(p)}, 'Volver a comprar'))));
+  }
+  pintarDetalle();
+}
+function chip(t, on, f) { return el('button', {class: 'chip', 'aria-pressed': String(on), onclick: f}, t) }
+function fila(p) {
+  return el('div', {class: 'item' + (abierto === p.id ? ' sel' : '')},
+    el('input', {type: 'checkbox', 'aria-label': 'Comprado: ' + p.nombre, onchange: () => comprar(p)}),
+    el('div', {}, el('div', {class: 'name', onclick: () => abrir(p.id)}, p.nombre), el('div', {class: 'det'}, detalleDe(p, filtroProy == null))),
+    el('div', {class: 'qty'}, el('button', {'aria-label': 'Menos', onclick: () => { p.cantidad = Math.max(paso(p.unidad), p.cantidad - paso(p.unidad)); guardar() }}, '−'),
+      el('span', {}, num(p.cantidad)), el('button', {'aria-label': 'Más', onclick: () => { p.cantidad += paso(p.unidad); guardar() }}, '+')));
+}
+function abrir(i) { abierto = abierto === i ? null : i; pintar(); if (abierto && matchMedia('(max-width: 880px)').matches) $('detalle').scrollIntoView({behavior: 'smooth'}) }
+function pintarDetalle() {
+  const box = $('detalle'), p = abierto && buscar(abierto);
+  box.hidden = !p; if (!p) return;
+  const campo = (lab, k, ph = '') => { const i = el('input', {id: 'd-' + k, value: k === 'cantidad' ? num(p.cantidad) : (p[k] ?? ''), placeholder: ph}); i.onchange = () => { if (k === 'cantidad') p.cantidad = cant(i.value) || p.cantidad; else if (k === 'unidad') p.unidad = normUni(i.value); else if (k === 'enlace') p.enlace = /^http/.test(i.value) ? i.value.trim() : undefined; else p[k] = i.value.trim(); guardar() }; return el('label', {}, lab, i) };
+  const sel = el('select', {id: 'd-seccion', onchange: e => { p.seccion = e.target.value; guardar() }}, KEYS.map(s => { const o = el('option', {value: s}, SECS[s]); if (s === p.seccion) o.selected = true; return o }));
+  const precio = el('input', {id: 'd-precio', placeholder: 'Precio pagado', inputmode: 'decimal'}), tienda = el('input', {id: 'd-tienda', placeholder: 'Tienda', value: (mejor(p) || {}).tienda || ''});
+  const bp = el('button', {onclick: e => precios(p, e.target)}, 'Buscar precios');
+  box.replaceChildren(...[
+    el('div', {class: 'row'}, el('h2', {style: 'flex:1'}, p.nombre + (p.estado === 'comprado' ? ' ✓' : '')), el('button', {class: 'link', onclick: () => abrir(p.id)}, 'Cerrar')),
+    campo('Producto', 'nombre'), el('div', {class: 'grid2'}, campo('Cantidad', 'cantidad'), campo('Unidad', 'unidad', 'kg, und, galón…')),
+    el('div', {class: 'grid2'}, el('label', {}, 'Sección', sel), campo('Proyecto', 'proyecto')),
+    campo('Notas (marca, medida, referencia)', 'notas'), campo('Enlace del producto', 'enlace', 'https://…'),
+    el('div', {class: 'row'}, bp, p.enlace ? el('a', {href: p.enlace, target: '_blank', rel: 'noopener'}, 'Abrir la página') : null),
+    p._resumen ? el('div', {}, p._resumen) : null,
+    ...(p.precios || []).slice().sort((a, b) => (a.precio || 9e15) - (b.precio || 9e15)).map(x => el('div', {class: 'price'},
+      el('div', {}, el('b', {}, x.tienda + ': ' + (x.precio ? dinero(x.precio, x.moneda) : 'sin precio')), x.presentacion ? ' · ' + x.presentacion : '', ' ', x.enlace ? el('a', {href: x.enlace, target: '_blank', rel: 'noopener'}, 'ver') : null),
+      el('div', {class: 'hint'}, [x.fecha && 'precio del ' + x.fecha, 'consultado ' + x.consultado, x.nota].filter(Boolean).join(' · ')))),
+    p.estado === 'comprado'
+      ? el('div', {class: 'row'}, el('button', {class: 'pri', onclick: () => volver(p)}, 'Volver a comprar'))
+      : el('div', {class: 'col', style: 'gap:8px'}, el('div', {class: 'grid2'}, precio, tienda), el('button', {class: 'pri', onclick: () => comprar(p, precioDe(precio.value), tienda.value.trim())}, 'Marcar comprado')),
+    (p.historial || []).length ? el('div', {class: 'hint'}, 'Historial: ' + p.historial.slice().reverse().map(h => [h.fecha, uniTexto(h.cantidad, p.unidad), h.precio && dinero(h.precio), h.tienda].filter(Boolean).join(' · ')).join(' | ')) : null,
+    el('button', {class: 'link', style: 'align-self:flex-start;color:var(--bad)', onclick: () => { D.productos = D.productos.filter(x => x.id !== p.id); abierto = null; guardar() }}, 'Quitar de la lista')].filter(x => x != null));
+}
+pintar();
+</script>
