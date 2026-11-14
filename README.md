@@ -40,6 +40,10 @@ También está publicada como página de Claude (para abrirla sin el archivo); a
 
 ## Instalar
 
+**Sin el PC**: cada cambio en `main` se compila en GitHub Actions y el APK queda en [releases/ultima](https://github.com/davidsant7e/emperatriz-android/releases/tag/ultima) → descarga `la-emperatriz.apk` en el celular e instálalo.
+
+**Con el PC**:
+
 1. Abre la carpeta en **Android Studio** y deja que sincronice Gradle.
 2. Conecta el celular con depuración USB y pulsa **Run**.
 3. En la app: **⋮ → Ajustes → Clave de Gemini** (gratis en [aistudio.google.com/apikey](https://aistudio.google.com/apikey); se guarda **cifrada** con el Android Keystore). Pon tu **ciudad** para que los precios sean de ahí.
