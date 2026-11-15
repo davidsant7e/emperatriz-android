@@ -2,6 +2,7 @@ package com.davidsant7e.emperatriz.datos
 
 import android.content.Context
 import com.davidsant7e.emperatriz.nucleo.Datos
+import com.davidsant7e.emperatriz.registro.Registro
 import java.io.File
 
 /** La lista se guarda como un JSON en la memoria privada de la app (el mismo formato del respaldo). */
@@ -11,6 +12,7 @@ class Almacen(private val ctx: Context) {
     fun cargar(hoy: String): Datos = try {
         if (archivo.exists()) Datos.deJson(archivo.readText(), hoy) else Datos()
     } catch (e: Exception) {
+        Registro.error("ALMACEN", e)
         // Un archivo dañado no debe impedir abrir la app: se aparta y se empieza de nuevo.
         archivo.renameTo(File(ctx.filesDir, "lista-danada-${System.currentTimeMillis()}.json"))
         Datos()

@@ -13,6 +13,7 @@ import com.davidsant7e.emperatriz.nucleo.Gemini
 import com.davidsant7e.emperatriz.nucleo.Lista
 import com.davidsant7e.emperatriz.nucleo.Pedido
 import com.davidsant7e.emperatriz.nucleo.Producto
+import com.davidsant7e.emperatriz.registro.Registro
 import java.io.IOException
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
@@ -101,6 +102,7 @@ class EmperatrizViewModel(app: Application) : AndroidViewModel(app) {
         }
         val imp = Lista.importar(e.datos, r, hoy())
         cambiar { imp.datos }
+        Registro.evento("LISTA", "agregar", "agregados" to imp.agregados, "actualizados" to imp.actualizados, "json" to (Pedido.extraerJson(texto) != null))
         avisar(resumen(imp.agregados, imp.actualizados))
         return true
     }
@@ -211,6 +213,7 @@ class EmperatrizViewModel(app: Application) : AndroidViewModel(app) {
             val nombre = listOf(Exportar.linea(p.copy(proyecto = "", notas = "")), p.notas).filter { it.isNotBlank() }.joinToString(" · ")
             val b = gemini.buscarPrecios(nombre, p.notas, p.enlace, e.lugar, hoy(), clave, e.modelo)
             withContext(Dispatchers.Main) {
+                Registro.evento("GEMINI", "precios", "precios" to b.precios.size, "fuentes" to b.fuentes.size, "con_enlace" to (p.enlace != null), "modelo" to e.modelo)
                 if (b.precios.isNotEmpty()) cambiar { Lista.guardarPrecios(it, id, b.precios, hoy()) }
                 _estado.update { it.copy(busqueda = id to b) }
             }
@@ -224,6 +227,7 @@ class EmperatrizViewModel(app: Application) : AndroidViewModel(app) {
         conGemini("Buscando cómo hacer ${p.nombre} en casa…") { clave ->
             val e = _estado.value
             val r = gemini.casero(p.nombre, p.notas, e.lugar, clave, e.modelo)
+            Registro.evento("GEMINI", "casero", "factible" to r.factible, "ingredientes" to r.ingredientes.size, "pasos" to r.pasos.size)
             withContext(Dispatchers.Main) { _estado.update { it.copy(receta = id to r) } }
         }
     }
@@ -255,8 +259,10 @@ class EmperatrizViewModel(app: Application) : AndroidViewModel(app) {
             try {
                 trabajo(Boveda.leer(ctx))
             } catch (e: IOException) {
+                Registro.error("GEMINI", e)
                 withContext(Dispatchers.Main) { avisar(e.message ?: "No se pudo conectar con Gemini") }
             } catch (e: Exception) {
+                Registro.error("GEMINI", e)
                 withContext(Dispatchers.Main) { avisar("Error: ${e.message ?: e.javaClass.simpleName}") }
             } finally {
                 _estado.update { it.copy(ocupado = null) }

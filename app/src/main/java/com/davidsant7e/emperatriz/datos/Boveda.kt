@@ -4,6 +4,7 @@ import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import com.davidsant7e.emperatriz.registro.Registro
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -33,6 +34,7 @@ object Boveda {
             c.init(Cipher.DECRYPT_MODE, llave(), GCMParameterSpec(128, iv))
             String(c.doFinal(todo.copyOfRange(12, todo.size)), Charsets.UTF_8)
         } catch (e: Exception) {
+            Registro.error("BOVEDA", e)
             null // la llave cambió (por ejemplo, tras restaurar el teléfono): hay que volver a pegar la clave
         }
     }

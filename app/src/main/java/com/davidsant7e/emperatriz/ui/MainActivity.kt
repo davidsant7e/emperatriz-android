@@ -18,6 +18,7 @@ import androidx.core.content.FileProvider
 import androidx.core.content.IntentCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.davidsant7e.emperatriz.nucleo.Exportar
+import com.davidsant7e.emperatriz.registro.Registro
 import java.io.File
 
 class MainActivity : ComponentActivity() {
@@ -77,6 +78,7 @@ class MainActivity : ComponentActivity() {
         val texto = try {
             contentResolver.openInputStream(uri)?.use { it.readBytes().let { b -> String(b, 0, minOf(b.size, MAX_ARCHIVO), Charsets.UTF_8) } }
         } catch (e: Exception) {
+            Registro.error("ARCHIVO", e)
             null
         }
         if (texto.isNullOrBlank()) Toast.makeText(this, "No pude leer el archivo.", Toast.LENGTH_LONG).show()
@@ -92,6 +94,7 @@ class MainActivity : ComponentActivity() {
         try {
             dictar.launch(i)
         } catch (e: ActivityNotFoundException) {
+            Registro.error("DICTADO", e)
             Toast.makeText(this, "Este celular no tiene dictado por voz (app de Google).", Toast.LENGTH_LONG).show()
         }
     }
