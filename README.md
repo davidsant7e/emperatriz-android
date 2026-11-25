@@ -6,7 +6,7 @@ Lista de compras para el **celular (Android)** y el **PC (página web)**: mercad
 
 La Emperatriz provee la casa: lo que hay que comprar, dónde está más barato y para qué proyecto es.
 
-## Qué hace (versión 0.1, fase 1)
+## Qué hace (versión 0.2, fase 1)
 
 - **Agregar escribiendo o dictando** (🎤, dictado de Google en español): «2 kg de arroz, leche y 3 tornillos para el proyecto baño». Entiende cantidades («1/2», «1 1/2», «dos», «media docena»), unidades (kg, lb, g, l, ml, und, galón, caja, bolsa, metro…), «x3» al final, `#Proyecto` o «(proyecto: Baño)». La sección la adivina por el nombre (tornillo → Ferretería, jabón → Aseo, acetaminofén → Farmacia).
 - **✦ Ordenar con Gemini**: para textos largos o desordenados (un mensaje, una lista copiada), Gemini separa productos, cantidades, sección y proyecto.
@@ -21,6 +21,23 @@ La Emperatriz provee la casa: lo que hay que comprar, dónde está más barato y
   - *Exportar → Para Claude*: resumen + JSON. Claude lo analiza o lo cruza con tus otros proyectos.
   - *Claude → La Emperatriz*: pídele a Claude «dame un JSON para La Emperatriz con…» y compártelo a la app (o pégalo). Acepta el JSON aunque venga con texto alrededor o dentro de ```json. Formato en [FORMATO.md](FORMATO.md).
 - **Exportar**: lista con casillas para WhatsApp, respaldo JSON (archivo), hoja de cálculo CSV (Excel / Google Sheets).
+- **Al terminar de conducir** (0.2): cuando se desactiva el **modo Conducción** de Android (Ajustes → Modos), llega la notificación **«¿Qué debes comprar?»** con cuántos productos faltan, los primeros nombres y los proyectos; al tocarla (o «Ver lista») se abre La Emperatriz en lo pendiente. «Ahora no» la quita. Ver abajo.
+
+## Avisarme al terminar de conducir
+
+Se activa en **⋮ → Ajustes → Avisarme al terminar de conducir**, y pide dos permisos (con el estado y un botón en la misma pantalla):
+
+1. **Acceso a No molestar** (Ajustes de Android → Notificaciones → Acceso a No molestar → La Emperatriz). Los modos de Android (Conducción, Hora de dormir…) funcionan sobre No molestar, y Android le avisa de cada cambio a las apps con este acceso **aunque estén cerradas**. La Emperatriz solo lee; no cambia tus modos.
+2. **Notificaciones**, para mostrar el aviso.
+
+Cómo decide:
+- Un modo «empieza» cuando No molestar pasa a prioridad/silencio/alarmas y «termina» cuando vuelve a dejar pasar todo.
+- Android no le dice a otra app **cuál** modo está activo. Si usas solo el modo Conducción no hay que hacer nada; si usas otros (Hora de dormir…), activa el modo Conducción y toca **«Este es mi modo Conducción»**: se guarda su huella (filtro + reglas de notificaciones) y los demás modos ya no avisan.
+- No avisa si el modo duró menos de 2 minutos (sin querer) o más de 6 horas (no es un trayecto), si no hay nada pendiente, ni más de una vez cada 30 minutos.
+- La notificación es de prioridad alta (Android no deja abrir una pantalla sola desde segundo plano) y se borra sola a las 2 horas.
+- **Probar el aviso** la muestra de inmediato.
+- En el registro de la app queda `CONDUCCION | inicio / fin (minutos, decisión) / aviso (cuántos pendientes)`, sin nombres de productos.
+- Límite: si tu modo Conducción está configurado para dejar pasar todas las notificaciones, Android no cambia No molestar y no hay forma de enterarse; deja al menos una restricción en el modo (la que trae por defecto sirve).
 
 ## Página para el PC
 
@@ -53,7 +70,7 @@ La llave de firma de prueba es la compartida de los Arcanos (`firma/`), así el 
 ## Privacidad
 
 - A Gemini solo va lo que consultas: el nombre/notas del producto, tu ciudad y el enlace (si lo hay). La lista completa no sale del celular salvo cuando tú la exportas o compartes.
-- Sin permisos: el dictado usa la app de Google; los archivos se comparten con el menú de Android.
+- Permisos: Internet (Gemini) y, solo si activas «Avisarme al terminar de conducir», Acceso a No molestar (para saber cuándo se apaga un modo; no lo cambia) y Notificaciones. El dictado usa la app de Google; los archivos se comparten con el menú de Android.
 - La lista se guarda en la memoria privada de la app (`lista.json`), sin copia en la nube (`allowBackup=false`): exporta el respaldo JSON.
 - Los precios los encuentra Gemini en la web: pueden cambiar o no incluir promociones; confírmalos en la tienda.
 
@@ -65,8 +82,10 @@ La llave de firma de prueba es la compartida de los Arcanos (`firma/`), así el 
   - `Pedido.kt`: lee texto dictado, JSON de Claude y respaldos; números, precios («$ 12.900») y unidades.
   - `Lista.kt`: agregar sin duplicar, comprar, volver a comprar, importar/combinar, costo por proyecto.
   - `Exportar.kt`: lista de texto, texto para Claude con JSON, CSV.
+  - `Conduccion.kt`: cuándo empieza y termina un modo, si se avisa (duración, huella, cada 30 min, pendientes) y el texto del aviso.
   - `Gemini.kt`: precios con `google_search` + `url_context`, «hacerlo en casa» y ordenar texto, con respuesta JSON (si el modelo no acepta herramientas con esquema, repite sin esquema).
 - `datos/`: `Almacen.kt`, `Ajustes.kt`, `Boveda.kt` (clave cifrada), `Red.kt`.
+- `conduccion/`: `ModosReceptor` (recibe los cambios de No molestar/Modos con la app cerrada), `Vigia` (lee el estado y guarda la sesión), `AvisoConduccion` (la notificación y «Ahora no»).
 - `ui/`: `MainActivity` (dictado, compartir, abrir archivos), `EmperatrizViewModel`, `Pantallas.kt`, `Dialogos.kt`.
 - `web/index.html`: la página del PC (HTML + JS sin dependencias).
 

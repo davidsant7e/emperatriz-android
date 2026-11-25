@@ -19,6 +19,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -407,6 +408,52 @@ fun DialogoProyectos(e: Estado, vm: EmperatrizViewModel, cerrar: () -> Unit) {
 
 // ---------------- Ajustes ----------------
 
+/** «Avisarme al terminar de conducir»: interruptor, permisos y el modo Conducción. */
+@Composable
+private fun AjustesConduccion(c: EstadoConduccion, vm: EmperatrizViewModel, a: Acciones) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("Avisarme al terminar de conducir", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+        Switch(checked = c.activado, onCheckedChange = { si ->
+            vm.avisarAlConducir(si)
+            if (si && !c.notificaciones) a.pedirNotificaciones()
+        })
+    }
+    Text(
+        "Cuando se desactive el modo Conducción (Ajustes → Modos), te llega la notificación «¿Qué debes comprar?» con lo " +
+            "pendiente; al tocarla se abre la lista. No avisa si no hay nada pendiente, ni más de una vez cada 30 minutos.",
+        style = MaterialTheme.typography.bodySmall,
+    )
+    if (!c.activado) return
+    EstadoPermiso(
+        "Acceso a No molestar", c.accesoNoMolestar,
+        "Para enterarse, con la app cerrada, de que un modo se apagó. La Emperatriz no cambia tus modos.",
+        "Dar acceso", a.pedirAccesoNoMolestar,
+    )
+    EstadoPermiso("Notificaciones", c.notificaciones, "Para mostrar el aviso.", "Permitir", a.pedirNotificaciones)
+    Text(
+        if (c.modoMarcado) "Modo Conducción reconocido: los demás modos (Hora de dormir…) no avisan."
+        else "Ahora avisa al terminar cualquier modo (de 2 minutos a 6 horas). Si usas otros modos, activa el modo Conducción y toca «Este es mi modo Conducción».",
+        style = MaterialTheme.typography.bodySmall,
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedButton(onClick = vm::marcarModoConduccion, enabled = c.modoActivo && c.accesoNoMolestar) { Text("Este es mi modo Conducción") }
+        if (c.modoMarcado) TextButton(onClick = vm::olvidarModoConduccion) { Text("Olvidar") }
+    }
+    TextButton(onClick = vm::probarAvisoConduccion) { Text("Probar el aviso") }
+}
+
+@Composable
+private fun EstadoPermiso(nombre: String, concedido: Boolean, para: String, boton: String, pedir: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text((if (concedido) "✓ " else "✗ ") + nombre + (if (concedido) ": concedido" else ": falta"),
+                color = if (concedido) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
+            Text(para, style = MaterialTheme.typography.labelSmall)
+        }
+        if (!concedido) Button(onClick = pedir) { Text(boton) }
+    }
+}
+
 @Composable
 fun DialogoAjustes(e: Estado, vm: EmperatrizViewModel, a: Acciones, cerrar: () -> Unit) {
     var clave by remember { mutableStateOf("") }
@@ -443,6 +490,8 @@ fun DialogoAjustes(e: Estado, vm: EmperatrizViewModel, a: Acciones, cerrar: () -
                     "A Gemini solo va el producto que consultas, la ciudad y el enlace (si lo hay). La lista se guarda solo en el celular.",
                     style = MaterialTheme.typography.labelSmall,
                 )
+                HorizontalDivider(Modifier.padding(vertical = 6.dp))
+                AjustesConduccion(e.conduccion, vm, a)
             }
         },
         confirmButton = {

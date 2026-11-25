@@ -4,6 +4,10 @@
     <!-- Solo para Gemini (precios, «hacerlo en casa», ordenar la lista). -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- «Avisarme al terminar de conducir»: saber cuándo se apaga un modo (No molestar / Modos) y avisar. -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!-- Dictado por voz con la app de Google (no necesita permiso de micrófono propio). -->
     <queries>
         <intent>
@@ -51,6 +55,21 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/atajos_registro" />
         </activity>
+
+        <!-- Modos de Android (Conducción…): llega aunque la app esté cerrada si tiene «Acceso a No molestar». -->
+        <receiver
+            android:name=".conduccion.ModosReceptor"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.app.action.INTERRUPTION_FILTER_CHANGED" />
+                <action android:name="android.app.action.CONSOLIDATED_NOTIFICATION_POLICY_CHANGED" />
+                <action android:name="android.app.action.NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED" />
+            </intent-filter>
+        </receiver>
+        <!-- Botón «Ahora no» de la notificación. -->
+        <receiver
+            android:name=".conduccion.AhoraNoReceptor"
+            android:exported="false" />
 
         <!-- Archivos que se exportan (respaldo JSON, CSV). -->
         <provider

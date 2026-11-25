@@ -3,6 +3,7 @@ package com.davidsant7e.emperatriz.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.davidsant7e.emperatriz.conduccion.Vigia
 import com.davidsant7e.emperatriz.datos.Ajustes
 import com.davidsant7e.emperatriz.datos.Almacen
 import com.davidsant7e.emperatriz.datos.Boveda
@@ -45,6 +46,18 @@ data class Estado(
     val modelo: String = Gemini.MODELO,
     val lugar: Gemini.Lugar = Gemini.Lugar(),
     val aviso: String? = null,
+    val conduccion: EstadoConduccion = EstadoConduccion(),
+)
+
+/** «Avisarme al terminar de conducir»: el interruptor y los permisos, para Ajustes. */
+data class EstadoConduccion(
+    val activado: Boolean = false,
+    val accesoNoMolestar: Boolean = false,
+    val notificaciones: Boolean = false,
+    /** Ya se marcó cuál es el modo Conducción (si no, cualquier modo cuenta). */
+    val modoMarcado: Boolean = false,
+    /** Hay un modo activo en este momento (para poder marcarlo). */
+    val modoActivo: Boolean = false,
 )
 
 class EmperatrizViewModel(app: Application) : AndroidViewModel(app) {
@@ -283,6 +296,48 @@ class EmperatrizViewModel(app: Application) : AndroidViewModel(app) {
         Boveda.borrar(ctx)
         _estado.update { it.copy(hayClave = false) }
     }
+
+    // ---- Al terminar de conducir ----
+
+    /** Al volver a la app (por ejemplo después de dar un permiso en Ajustes de Android). */
+    fun refrescarConduccion() {
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching { Vigia.revisar(ctx, "app", puedeAvisar = false) }.onFailure { Registro.error("CONDUCCION", it, "fase" to "app") }
+            val c = EstadoConduccion(
+                activado = Vigia.activado(ctx),
+                accesoNoMolestar = Vigia.accesoNoMolestar(ctx),
+                notificaciones = Vigia.notificacionesPermitidas(ctx),
+                modoMarcado = Vigia.huellaConduccion(ctx) != null,
+                modoActivo = Vigia.modoActivoAhora(ctx),
+            )
+            _estado.update { it.copy(conduccion = c) }
+        }
+    }
+
+    fun avisarAlConducir(si: Boolean) {
+        Vigia.activar(ctx, si)
+        refrescarConduccion()
+    }
+
+    fun marcarModoConduccion() {
+        avisar(if (Vigia.marcarModoActual(ctx)) "Listo: ese es tu modo Conducción" else "No hay ningún modo activo ahora: activa el modo Conducción y vuelve a tocar")
+        refrescarConduccion()
+    }
+
+    fun olvidarModoConduccion() {
+        Vigia.olvidarModo(ctx)
+        refrescarConduccion()
+    }
+
+    fun probarAvisoConduccion() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val ok = Vigia.probar(ctx)
+            withContext(Dispatchers.Main) { if (!ok) avisar("Primero permite las notificaciones de La Emperatriz") }
+        }
+    }
+
+    /** Llegó desde la notificación: mostrar todo lo pendiente (sin filtros ni ventanas abiertas). */
+    fun verPendientes() = _estado.update { it.copy(seccion = null, proyecto = null, verComprados = false, abierto = null, busqueda = null, receta = null) }
 
     fun guardarAjustes(modelo: String, lugar: Gemini.Lugar) {
         ajustes.modelo = modelo
